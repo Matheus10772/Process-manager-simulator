@@ -1,0 +1,1 @@
+/usr/bin/cc    CMakeFiles/Simulator.dir/Origem.c.o  -o Simulator 
