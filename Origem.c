@@ -1,8 +1,7 @@
 #include <stdio.h>
-
-//using namespace std;
-
-int main(){
-	printf("Testando linguagem C com cmake");
-	return 0;
-}
+#include <stdlib.h>
+#include <string.h>
+#include <malloc.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
