@@ -22,7 +22,7 @@ rule CUSTOM_COMMAND
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__Reporter
+rule C_COMPILER__ProcessManager
   depfile = $DEP_FILE
   deps = gcc
   command = /usr/bin/cc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
@@ -32,7 +32,7 @@ rule C_COMPILER__Reporter
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__Reporter
+rule C_EXECUTABLE_LINKER__ProcessManager
   command = $PRE_LINK && /usr/bin/cc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
@@ -41,7 +41,7 @@ rule C_EXECUTABLE_LINKER__Reporter
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__Manager
+rule C_COMPILER__ProcessCommander
   depfile = $DEP_FILE
   deps = gcc
   command = /usr/bin/cc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
@@ -51,26 +51,7 @@ rule C_COMPILER__Manager
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__Manager
-  command = $PRE_LINK && /usr/bin/cc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
-  description = Linking C executable $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling C files.
-
-rule C_COMPILER__Commander
-  depfile = $DEP_FILE
-  deps = gcc
-  command = /usr/bin/cc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C executable.
-
-rule C_EXECUTABLE_LINKER__Commander
+rule C_EXECUTABLE_LINKER__ProcessCommander
   command = $PRE_LINK && /usr/bin/cc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT

@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Commander"
+			"path" : "ProcessCommander"
 		}
 	],
 	"backtrace" : 1,
@@ -45,7 +45,7 @@
 			]
 		}
 	],
-	"id" : "Commander::@6890427a1f51a3e7e1df",
+	"id" : "ProcessCommander::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -61,8 +61,8 @@
 		],
 		"language" : "C"
 	},
-	"name" : "Commander",
-	"nameOnDisk" : "Commander",
+	"name" : "ProcessCommander",
+	"nameOnDisk" : "ProcessCommander",
 	"paths" : 
 	{
 		"build" : ".",

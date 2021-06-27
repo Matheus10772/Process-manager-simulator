@@ -1,5 +1,7 @@
 # ninja log v5
-0	125	1624311187484272900	CMakeFiles/Commander.dir/ProcessCommander.c.o	9413e1e9efa68524
-0	188	1624315430002240900	CMakeFiles/Reporter.dir/ProcessReporter.c.o	8135684f3f694211
-5	599	1624315430417140600	CMakeFiles/Commander.dir/ProcessCommander.c.o	9413e1e9efa68524
-3	601	1624315430417140600	CMakeFiles/Manager.dir/ProcessManager.c.o	2ae0b4e9d5acb19f
+10	284	1624822191613493100	CMakeFiles/ProcessCommander.dir/ProcessCommander.c.o	6999f4a5177ae1c6
+0	304	1624822191632557200	CMakeFiles/ProcessManager.dir/ProcessManager.c.o	614e320212ab3da9
+285	438	1624822191765988900	ProcessCommander	d8202370c033de88
+304	452	1624822191781048100	ProcessManager	7c996e578f6df5f6
+1	250	1624823301855321800	CMakeFiles/ProcessManager.dir/ProcessManager.c.o	614e320212ab3da9
+251	392	1624823301995778300	ProcessManager	7c996e578f6df5f6

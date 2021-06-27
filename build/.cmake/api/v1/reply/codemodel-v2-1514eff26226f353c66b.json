@@ -15,8 +15,7 @@
 					"targetIndexes" : 
 					[
 						0,
-						1,
-						2
+						1
 					]
 				}
 			],
@@ -32,8 +31,7 @@
 					"targetIndexes" : 
 					[
 						0,
-						1,
-						2
+						1
 					]
 				}
 			],
@@ -41,23 +39,16 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "Commander::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Commander-Debug-63d0b930dce1c22dea91.json",
-					"name" : "Commander",
+					"id" : "ProcessCommander::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ProcessCommander-Debug-3b37076e9efb8453d857.json",
+					"name" : "ProcessCommander",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
-					"id" : "Manager::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Manager-Debug-719cc9b25842dd1f20c5.json",
-					"name" : "Manager",
-					"projectIndex" : 0
-				},
-				{
-					"directoryIndex" : 0,
-					"id" : "Reporter::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Reporter-Debug-7d357d6b74ccce488fb8.json",
-					"name" : "Reporter",
+					"id" : "ProcessManager::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ProcessManager-Debug-e99a5ef0ba619267e04b.json",
+					"name" : "ProcessManager",
 					"projectIndex" : 0
 				}
 			]

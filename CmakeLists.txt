@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.8)
 project(ProcessManagerSimulator)
-add_executable("Commander" ProcessCommander.c   "ProcessCommander.c")
-add_executable("Manager" ProcessManager.c   "ProcessManager.c")
-add_executable("Reporter" ProcessReporter.c   "ProcessReporter.c")
+add_executable("ProcessCommander" ProcessCommander.c   "ProcessCommander.c")
+add_executable("ProcessManager" ProcessManager.c   "ProcessManager.c" "ProcessManager.h")

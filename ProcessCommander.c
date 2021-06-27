@@ -8,13 +8,16 @@
 #include <sys/types.h>
 
 const int PIPE_FALIED_VALUE = -1;
+const int FORK_FALIED_VALUE = -1;
+pid_t childpid = -1;
 
 int* criarpipe() {
-    int pipefd = malloc(sizeof(int) * 2);
-    int statusvalue = pipe(pipefd);
-    if (statusvalue == PIPE_FALIED_VALUE){ //a chamada pipe retorna '-1' se a criação do pipe não for bem sucedida
+    int* pipefd = (int*)malloc(sizeof(int) * 2);
+    int* statusvalue = (int*)malloc(sizeof(int) * 1);
+    statusvalue[0] = pipe(pipefd);
+    if (*(statusvalue) == PIPE_FALIED_VALUE){ //a chamada pipe retorna '-1' se a criação do pipe não for bem sucedida
         perror("Erro ao criar um novo pipe");
-        return NULL;
+        return statusvalue;
     }
     return pipefd;
 }
@@ -22,9 +25,8 @@ int* criarpipe() {
 pid_t criarFork() {
     pid_t pid;
     pid = fork();
-    if (pid == -1) {
+    if (pid == FORK_FALIED_VALUE) {
         perror("Erro ao criar uma cópia do processo (fork)");
-        return NULL;
     }
     return pid;
 }
@@ -36,22 +38,24 @@ void redirecionarEntrada(int pipefd[], int entrada, int destino) {
 
 int* inicializarCommander() {
     int* pipefd;
-    pid_t childpid;
     int escolha;
-    while (!(pipefd = criarpipe()))
+    while (*(pipefd = criarpipe()) == PIPE_FALIED_VALUE)
     {
         printf("Deseja tentar criar o pipe novamente? Digite 1 para sim e 0 para sair");
         scanf("%d", &escolha);
-        if (escolha)
+        if (escolha == 0)
             exit(1);
     }
-    while (!(childpid = criarFork())) {
+    while ((childpid = criarFork()) == FORK_FALIED_VALUE) {
         printf("Deseja tentar criar o fork novamente? Digite 1 para sim e 0 para sair");
         scanf("%d", &escolha);
-        if (escolha)
+        if (escolha == 0)
             exit(1);
     }
+    printf("\nFork feito\n");
+    printf("\nChild pid: %d\n", childpid);
     if (childpid == 0) {
+        printf("\nProcessando filho\n");
         //close(pipefd[1]);
         redirecionarEntrada(pipefd, STDIN_FILENO, 0);
         execlp("./ProcessManager", "./ProcessManager", NULL); //Substitui o código do processo filho pelo código desejado
@@ -65,14 +69,17 @@ int main() {
     char command = '\0';
     int* pipefd;
 
-    pipefd = inicializarCommander();
+    if (childpid != 0) {
+        pipefd = inicializarCommander();
+        close(pipefd[0]);
+    }
     while (command != 'T')
     {
         printf("\nDigite o comando desejado:");
         printf("\nQ: Para colocar fim em uma unidade de tempo."
-               "\nU: Para desbloquear o primeiro processo da fila."
-               "\nP: Para imprimir o estado atual do sistema."
-               "\nT: Imprimi o tempo de retorno médio e, em seguida, finaliza o simulador"
+            "\nU: Para desbloquear o primeiro processo da fila."
+            "\nP: Para imprimir o estado atual do sistema."
+            "\nT: Imprimi o tempo de retorno médio e, em seguida, finaliza o simulador"
         );
         scanf("%c", &command);
         command = (char)toupper(command);
@@ -96,6 +103,7 @@ int main() {
             break;
         }
     }*/
-    
-	return 0;
+
+    }
+    return 0;
 }
