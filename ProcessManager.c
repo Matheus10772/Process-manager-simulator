@@ -131,10 +131,10 @@ void createNewProcess(PCB* pcbCalled, processoSimulado* processCalled,int priori
 		
 		/*Defini o ID do processo pai, caso o novo processo simulado criado não seja o primeiro processo*/
 		LastElementOfPCBTable->parentID = pcbCalled->ID;
-		newProcess->VariavelManipulada = processCalled->VariavelManipulada;
 		/*Fim da atribuição do ID do processo pai*/
 
 		/*Copiando dados do processo pai para o processo filho*/
+		newProcess->VariavelManipulada = processCalled->VariavelManipulada;
 		//_CPU.programInstructionsList = *(_CPU.programInstructionsList);
 		/*Fim da cópia*/
 	}
@@ -158,9 +158,10 @@ void createNewProcess(PCB* pcbCalled, processoSimulado* processCalled,int priori
 		/*Fim da cópia*/
 	}
 	LastElementOfPCBTable->ID = getNewID(); //Obtem um ID para o novo processo simulado criado
-	LastElementOfPCBTable->ProgramCounterTotal = 0;
 
 	/*Definindo informações remanascentes*/
+	LastElementOfPCBTable->ProgramCounter = 0;
+	LastElementOfPCBTable->totalElapsedTime = 0;
 	LastElementOfPCBTable->priority = priority;
 	LastElementOfPCBTable->startTime = tempo;
 	LastElementOfPCBTable->status = READY_STATUS;

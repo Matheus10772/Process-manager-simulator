@@ -25,21 +25,23 @@ typedef struct CPU {
 	int ProgramCounter; //(Tempo total)Carrega da tabela PCB o tempo do processo
 	int* VariavelManipulada; //Carrega o valor do processo simulado
 	//unsigned long int tempoTotal;
-	unsigned long int tempoAtual; //Inicia do zero sempre que um novo processo for colocado em execução
+	unsigned long int currentTime; //Inicia do zero sempre que um novo processo for colocado em execução
 }CPU;
 
 typedef struct processosSimulado { //Struct que representa o processo simulado
 	int VariavelManipulada;
+	char* programInstructionsList;
 }processoSimulado;
 
 typedef struct PCB {
 	int ID;
 	int parentID;
 	int ProgramCounter;//Ponteiro que permite acessar o contador da CPU para armazenar o valo caso o proceso seja bloqueado
-	processoSimulado* _ProcessoSimulado;//Ponteiro para acessar o valo inteiro do processo simulado
+	unsigned long int startTime;
+	unsigned long int totalElapsedTime;
 	short int priority;
 	short int status;
-	unsigned long int startTime;
+	processoSimulado* _ProcessoSimulado;//Ponteiro para acessar o valo inteiro do processo simulado
 	struct PCB* before; //ponteiro utilizado para apontar para o processo anterior, caso o processo esteja na lista de bloqueados ou de prontos
 	struct PCB* after; //ponteiro utilizado para apontar para o processo, caso o processo esteja na lista de bloqueados ou de prontos
 }PCB;
