@@ -21,17 +21,24 @@ int recycleIDcount = 0;
 unsigned long int tempo = 0;
 
 typedef struct CPU {
-	char* programInstructionsList; //Lista de instruções do processo
+	char* programInstructionsList; //Lista de instruï¿½ï¿½es do processo
 	int ProgramCounter; //(Tempo total)Carrega da tabela PCB o tempo do processo
 	int* VariavelManipulada; //Carrega o valor do processo simulado
 	//unsigned long int tempoTotal;
-	unsigned long int currentTime; //Inicia do zero sempre que um novo processo for colocado em execução
+	unsigned long int currentTime; //Inicia do zero sempre que um novo processo for colocado em execuï¿½ï¿½o
 }CPU;
 
 typedef struct processosSimulado { //Struct que representa o processo simulado
-	int VariavelManipulada;
+	int VariavelManipulada,cpu;
 	char* programInstructionsList;
 }processoSimulado;
+
+typedef struct tiposSimulado{
+	char tipo;
+	char* valor;
+}tipoSimulado;
+
+
 
 typedef struct PCB {
 	int ID;
@@ -64,11 +71,11 @@ typedef struct BlokedProcess {
 }BlokedProcess;
 
 
-PCBDescritor tabelaPCB;//lista encadeada que vai conter as entradas para os processos que não terminaram a execução
+PCBDescritor tabelaPCB;//lista encadeada que vai conter as entradas para os processos que nï¿½o terminaram a execuï¿½ï¿½o
 CPU _CPU;
-ReadyProcess* _ReadyProcess; //array(dinâmico) que vai conter os indices do array tabela PCB, e esses indices levam para os endereços de memória que contem processos prontos para executar
-PCB* ExecutingProcess = NULL; //contém um indice tabela PCB. O processo acessado por esse índice, é o processo sendo executado no momento
-BlokedProcess* _BlokedProcess; //array(dinâmico) que vai conter os índices da tabela PCB, que armazena os procesos que estão com execução pausada
+ReadyProcess* _ReadyProcess; //array(dinï¿½mico) que vai conter os indices do array tabela PCB, e esses indices levam para os endereï¿½os de memï¿½ria que contem processos prontos para executar
+PCB* ExecutingProcess = NULL; //contï¿½m um indice tabela PCB. O processo acessado por esse ï¿½ndice, ï¿½ o processo sendo executado no momento
+BlokedProcess* _BlokedProcess; //array(dinï¿½mico) que vai conter os ï¿½ndices da tabela PCB, que armazena os procesos que estï¿½o com execuï¿½ï¿½o pausada
 
 int getNewID();
 void removeID(int ID);
@@ -79,3 +86,12 @@ void processBlokedQueUE(PCB* pcbElement);
 void processBlokedRemoveQueUE(PCB* pcbElement);
 void updateLastElementOfPCBTable(PCB* elementoPCB);
 void createNewProcess(PCB* pcbCalled, processoSimulado* processCalled, int priority);
+
+//Processo Simulado
+
+PCB * processo(char *programa);
+void atualizar_valor(PCB * aux);
+void adicionar_valor(PCB * aux);
+void subtrair_valor(PCB * aux);
+int valor_prioridade(tipoSimulado ** simulado);
+tipoSimulado** instrucoes(char *nome);
