@@ -77,33 +77,13 @@ int main() {
     {
         printf("\nDigite o comando desejado:");
         printf("\nQ: Para colocar fim em uma unidade de tempo."
-            "\nU: Para desbloquear o primeiro processo da fila."
-            "\nP: Para imprimir o estado atual do sistema."
-            "\nT: Imprimi o tempo de retorno médio e, em seguida, finaliza o simulador"
+               "\nU: Para desbloquear o primeiro processo da fila."
+               "\nP: Para imprimir o estado atual do sistema."
+               "\nT: Imprimi o tempo de retorno médio e, em seguida, finaliza o simulador\n"
         );
         scanf("%c", &command);
         command = (char)toupper(command);
         write(pipefd[1], &command, 1);
-        /*switch (command)
-        {
-        case 'Q': {
-            break;
-        }
-        case 'U': {
-            break;
-        }
-        case 'P': {
-            break;
-        }
-        case 'T': {
-            break;
-        }
-        default:
-            printf("Opção inválida");
-            break;
-        }
-    }*/
-
     }
     return 0;
 }

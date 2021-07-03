@@ -3,12 +3,13 @@
 #include <string.h>
 #include <malloc.h>
 #include <time.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
 
-const short int LOW_PRIORITY = -1;
-const short int NORMAL_PRIORITY = 0;
-const short int HIGH_PRIORITY = 1;
+const short int LOW_PRIORITY = 50;
+const short int NORMAL_PRIORITY = 70;
+const short int HIGH_PRIORITY = 100;
 
 const short int READY_STATUS = 1;
 const short int EXECUTING_STATUS = 0;
@@ -21,7 +22,7 @@ int recycleIDcount = 0;
 unsigned long int tempo = 0;
 
 typedef struct CPU {
-	char* programInstructionsList; //Lista de instru��es do processo
+	char*** programInstructionsList; //Lista de instru��es do processo
 	int ProgramCounter; //(Tempo total)Carrega da tabela PCB o tempo do processo
 	int* VariavelManipulada; //Carrega o valor do processo simulado
 	//unsigned long int tempoTotal;
@@ -29,16 +30,14 @@ typedef struct CPU {
 }CPU;
 
 typedef struct processosSimulado { //Struct que representa o processo simulado
-	int VariavelManipulada,cpu;
-	char* programInstructionsList;
+	int VariavelManipulada;
+	char*** programInstructionsList;
 }processoSimulado;
 
-typedef struct tiposSimulado{
+/*typedef struct tiposSimulado {
 	char tipo;
 	char* valor;
-}tipoSimulado;
-
-
+}tipoSimulado;*/
 
 typedef struct PCB {
 	int ID;
@@ -49,49 +48,61 @@ typedef struct PCB {
 	short int priority;
 	short int status;
 	processoSimulado* _ProcessoSimulado;//Ponteiro para acessar o valo inteiro do processo simulado
-	struct PCB* before; //ponteiro utilizado para apontar para o processo anterior, caso o processo esteja na lista de bloqueados ou de prontos
-	struct PCB* after; //ponteiro utilizado para apontar para o processo, caso o processo esteja na lista de bloqueados ou de prontos
-}PCB;
+}PCB; 
 
-typedef struct PCBDescritor {
-	PCB* firstElement;//ponteiro para o primeiro elemento da tabela PCB
-	PCB* lastElement;//ponteiro para o ultimo elemento da tabela PCB
-}PCBDescritor;
+	
 
-typedef struct ReadyProcess {
-	PCB* atual;
-	struct ReadyProcess* before;
-	struct ReadyProcess* after;
-}ReadyProcess;
-
-typedef struct BlokedProcess {
-	PCB* atual;
-	struct BlokedProcess* before;
-	struct BlokedProcess* after;
-}BlokedProcess;
-
-
-PCBDescritor tabelaPCB;//lista encadeada que vai conter as entradas para os processos que n�o terminaram a execu��o
 CPU _CPU;
-ReadyProcess* _ReadyProcess; //array(din�mico) que vai conter os indices do array tabela PCB, e esses indices levam para os endere�os de mem�ria que contem processos prontos para executar
-PCB* ExecutingProcess = NULL; //cont�m um indice tabela PCB. O processo acessado por esse �ndice, � o processo sendo executado no momento
-BlokedProcess* _BlokedProcess; //array(din�mico) que vai conter os �ndices da tabela PCB, que armazena os procesos que est�o com execu��o pausada
+PCB* tabelaPCB;
+int sizeOfVetorTabelaPCB = 128;
+int indiceOfVetorTabelaPCB = -1;
+
+int* BlokedProcessLowPriority;
+int indiceVetorBlokedProcessLowPriority = -1;
+int sizeOfVetorBlokedProcessLowPriority = 128;
+
+int* BlokedProcessNormalPriority;
+int indiceVetorBlokedProcessNormalPriority = -1;
+int sizeOfVetorBlokedProcessNormalPriority = 128;
+
+int* BlokedProcessHighPriority;
+int indiceVetorBlokedProcessHighPriority = -1;
+int sizeOfVetorBlokedProcessHighPriority = 128;
+
+int* ReadyProcessLowPriority;
+int indiceVetorReadyProcessLowPriority = -1;
+int sizeOfVetorReadyProcessLowPriority = 128;
+
+int* ReadyProcessNormalPriority;
+int indiceVetorReadyProcessNormalPriority = -1;
+int sizeOfVetorReadyProcessNormalPriority = 128;
+
+int* ReadyProcessHighPriority;
+int indiceVetorReadyProcessHighPriority = -1;
+int sizeOfVetorReadyProcessHighPriority = 128;
+
+int ExecutingProcess;
 
 int getNewID();
 void removeID(int ID);
-PCB* getLastElementOfPCBTable(PCB* elementoPCB);
-void processReadyQueUE(PCB* pcbElement);
-void processReadyRemoveQueUE(PCB* pcbElement);
-void processBlokedQueUE(PCB* pcbElement);
-void processBlokedRemoveQueUE(PCB* pcbElement);
-void updateLastElementOfPCBTable(PCB* elementoPCB);
-void createNewProcess(PCB* pcbCalled, processoSimulado* processCalled, int priority);
+void* reallocVector(void* vetor, int* indice, int* valorMaximo, char tipo);
+void* popBackVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo);
+void processReadyQueUE(int indice);
+void processReadyRemoveQueUE(int indice);
+void processBlokedQueUE(int indice);
+void processBlokedRemoveQueUE(int indice);
+PCB* getLastElementOfPCBTable();
+void createNewProcess(PCB* pcbCalled, int priority);
+int scheduler(int priorityEspecific);
+void contextChange(int indice);
+PCB* initiManager();
+//void blockProcess();
 
 //Processo Simulado
 
-PCB * processo(char *programa);
-void atualizar_valor(PCB * aux);
-void adicionar_valor(PCB * aux);
-void subtrair_valor(PCB * aux);
-int valor_prioridade(tipoSimulado ** simulado);
-tipoSimulado** instrucoes(char *nome);
+//PCB * processo(char *programa);
+//void atualizar_valor(PCB * aux);
+//void adicionar_valor(PCB * aux);
+//void subtrair_valor(PCB * aux);
+//int valor_prioridade(tipoSimulado ** simulado);
+//tipoSimulado** instrucoes(char *nome);

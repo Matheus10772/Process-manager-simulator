@@ -1,0 +1,1 @@
+gcc -o ProcessManager ProcessManager.c && gcc -o commander ProcessCommander.c
