@@ -1,4 +1,33 @@
 #include "ProcessManager.h"
+const int PIPE_FALIED_VALUE = -1;
+const int FORK_FALIED_VALUE = -1;
+pid_t  childpid;
+
+int* criarpipe() {
+	int* pipefd = (int*)malloc(sizeof(int) * 2);
+	int* statusvalue = (int*)malloc(sizeof(int) * 1);
+	statusvalue[0] = pipe(pipefd);
+	if (*(statusvalue) == PIPE_FALIED_VALUE) { //a chamada pipe retorna '-1' se a criação do pipe não for bem sucedida
+		perror("Erro ao criar um novo pipe");
+		return statusvalue;
+	}
+	return pipefd;
+}
+
+pid_t criarFork() {
+	pid_t pid;
+	pid = fork();
+	if (pid == FORK_FALIED_VALUE) {
+		perror("Erro ao criar uma cópia do processo (fork)");
+	}
+	return pid;
+}
+
+void redirecionarEntrada(int pipefd[], int entrada, int destino) {
+	dup2(pipefd[destino], entrada);
+	close(pipefd[destino]);
+}
+
 
 int getNewID() {
 	if (recycleIDcount > 0) {
@@ -32,78 +61,7 @@ void* reallocVector(void* vetor, int* indice, int* valorMaximo, char tipo) {
 	return vetor;
 }
 
-void processReadyQueUE(int indice) { //Coloca o indice do elemento desejado na lista de processo prontos
-	int priority = tabelaPCB[indice].priority;
-	if (priority == LOW_PRIORITY) {
-		ReadyProcessLowPriority = reallocVector(ReadyProcessLowPriority, &indiceVetorReadyProcessLowPriority, &sizeOfVetorReadyProcessLowPriority, 'i');
-		indiceVetorReadyProcessLowPriority++;
-		ReadyProcessLowPriority[indiceVetorReadyProcessLowPriority] = indice;
-	}
-	else if (priority == NORMAL_PRIORITY) {
-		ReadyProcessNormalPriority = reallocVector(ReadyProcessNormalPriority, &indiceVetorReadyProcessNormalPriority, &sizeOfVetorReadyProcessNormalPriority, 'i');
-		indiceVetorReadyProcessNormalPriority++;
-		printf("indice: %d", indice);
-		ReadyProcessNormalPriority[indiceVetorReadyProcessNormalPriority] = indice;
-	}
-	else if (priority == HIGH_PRIORITY) {
-		ReadyProcessHighPriority = reallocVector(ReadyProcessHighPriority, &indiceVetorReadyProcessHighPriority, &sizeOfVetorReadyProcessHighPriority, 'i');
-		indiceVetorReadyProcessHighPriority++;
-		ReadyProcessHighPriority[indiceVetorReadyProcessHighPriority] = indice;
-	}
-}
-
-void processReadyRemoveQueUE(int indice) {//Remove o indice do elemento desejado da lista de processos prontos
-	int priority = tabelaPCB[indice].priority;
-	if (priority == LOW_PRIORITY) {
-		popBackVector(ReadyProcessLowPriority, &indice, indiceVetorReadyProcessLowPriority, 'i');
-		indiceVetorReadyProcessLowPriority--;
-	}
-	else if (priority == NORMAL_PRIORITY) {
-		popBackVector(ReadyProcessNormalPriority, &indice, indiceVetorReadyProcessNormalPriority, 'i');
-		indiceVetorReadyProcessNormalPriority--;
-	}
-	else if (priority == HIGH_PRIORITY) {
-		popBackVector(ReadyProcessHighPriority, &indice, indiceVetorReadyProcessHighPriority, 'i');
-		indiceVetorReadyProcessHighPriority--;
-	}
-}
-
-void processBlokedQueUE(int indice) { // Coloca o indice do elemento desejado na lista de elementos bloqueados
-	int priority = tabelaPCB[indice].priority;
-	if (priority == LOW_PRIORITY) {
-		BlokedProcessLowPriority = reallocVector(BlokedProcessLowPriority, &indiceVetorBlokedProcessLowPriority, &sizeOfVetorBlokedProcessLowPriority, 'i');
-		indiceVetorBlokedProcessLowPriority++;
-		BlokedProcessLowPriority[indiceVetorBlokedProcessLowPriority] = indice;
-	}
-	else if (priority == NORMAL_PRIORITY) {
-		BlokedProcessNormalPriority = reallocVector(BlokedProcessNormalPriority, &indiceVetorBlokedProcessNormalPriority, &sizeOfVetorBlokedProcessNormalPriority, 'i');
-		indiceVetorBlokedProcessNormalPriority++;
-		BlokedProcessNormalPriority[indiceVetorBlokedProcessNormalPriority] = indice;
-	}
-	else if (priority == HIGH_PRIORITY) {
-		BlokedProcessHighPriority = reallocVector(BlokedProcessHighPriority, &indiceVetorBlokedProcessHighPriority, &sizeOfVetorBlokedProcessHighPriority, 'i');
-		indiceVetorBlokedProcessHighPriority++;
-		BlokedProcessHighPriority[indiceVetorBlokedProcessHighPriority] = indice;
-	}
-}
-
-void processBlokedRemoveQueUE(int indice) { //remove o indice do elemento desejado da lista de processos bloqueados
-	int priority = tabelaPCB[indice].priority;
-	if (priority == LOW_PRIORITY) {
-		popBackVector(BlokedProcessLowPriority, &indice, indiceVetorBlokedProcessLowPriority, 'i');
-		indiceVetorBlokedProcessLowPriority--;
-	}
-	else if (priority == NORMAL_PRIORITY) {
-		popBackVector(BlokedProcessNormalPriority, &indice, indiceVetorBlokedProcessNormalPriority, 'i');
-		indiceVetorBlokedProcessNormalPriority--;
-	}
-	else if (priority == HIGH_PRIORITY) {
-		popBackVector(BlokedProcessHighPriority, &indice, indiceVetorBlokedProcessHighPriority, 'i');
-		indiceVetorBlokedProcessHighPriority--;
-	}
-}
-
-void* popBackVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo)
+void removeFromVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo)
 {
 	if (strcmp(&tipo, "i") == 0) {
 		int* _vetor = (int*)vetor;
@@ -121,23 +79,92 @@ void* popBackVector(const void* vetor, void* valueOfremove, int indiceMaximo, ch
 		PCB* _vetor = (PCB*)vetor;
 		int i;
 		for (i = 0; i < indiceMaximo; i++) {
-			if ((_vetor+(sizeof(PCB)*i))->ID == ((PCB*)valueOfremove)->ID) {
-				indiceOfVetorTabelaPCB--;
+			if (_vetor[i].ID == ((PCB*)valueOfremove)->ID) {
 				int j;
 				for (j = i; j < indiceMaximo - 1; j++) {
-					memcpy((_vetor + (sizeof(PCB) * (j + 1))), (_vetor + (sizeof(PCB) * j)), sizeof(*(_vetor + (sizeof(PCB) * j))));
+					memcpy(&(_vetor[i]), &(_vetor[i + 1]), sizeof(PCB));
 				}
+				indiceOfVetorTabelaPCB--;
 			}
 		}
 	}
 }
 
 
+void processReadyQueUE(int indice) { //Coloca o indice do elemento desejado na lista de processo prontos
+	int priority = tabelaPCB[indice].priority;
+	if (priority == LOW_PRIORITY) {
+		ReadyProcessLowPriority = (int*)reallocVector(ReadyProcessLowPriority, &indiceVetorReadyProcessLowPriority, &sizeOfVetorReadyProcessLowPriority, 'i');
+		indiceVetorReadyProcessLowPriority++;
+		ReadyProcessLowPriority[indiceVetorReadyProcessLowPriority] = indice;
+	}
+	else if (priority == NORMAL_PRIORITY) {
+		ReadyProcessNormalPriority = (int*)reallocVector(ReadyProcessNormalPriority, &indiceVetorReadyProcessNormalPriority, &sizeOfVetorReadyProcessNormalPriority, 'i');
+		indiceVetorReadyProcessNormalPriority++;
+		ReadyProcessNormalPriority[indiceVetorReadyProcessNormalPriority] = indice;
+	}
+	else if (priority == HIGH_PRIORITY) {
+		ReadyProcessHighPriority = (int*)reallocVector(ReadyProcessHighPriority, &indiceVetorReadyProcessHighPriority, &sizeOfVetorReadyProcessHighPriority, 'i');
+		indiceVetorReadyProcessHighPriority++;
+		ReadyProcessHighPriority[indiceVetorReadyProcessHighPriority] = indice;
+	}
+}
+
+void processReadyRemoveQueUE(int indice) {//Remove o indice do elemento desejado da lista de processos prontos
+	int priority = tabelaPCB[indice].priority;
+	if (priority == LOW_PRIORITY) {
+		removeFromVector(ReadyProcessLowPriority, &indice, indiceVetorReadyProcessLowPriority, 'i');
+		indiceVetorReadyProcessLowPriority--;
+	}
+	else if (priority == NORMAL_PRIORITY) {
+		removeFromVector(ReadyProcessNormalPriority, &indice, indiceVetorReadyProcessNormalPriority, 'i');
+		indiceVetorReadyProcessNormalPriority--;
+	}
+	else if (priority == HIGH_PRIORITY) {
+		removeFromVector(ReadyProcessHighPriority, &indice, indiceVetorReadyProcessHighPriority, 'i');
+		indiceVetorReadyProcessHighPriority--;
+	}
+}
+
+void processBlokedQueUE(int indice) { // Coloca o indice do elemento desejado na lista de elementos bloqueados
+	int priority = tabelaPCB[indice].priority;
+	if (priority == LOW_PRIORITY) {
+		BlokedProcessLowPriority = (int*)reallocVector(BlokedProcessLowPriority, &indiceVetorBlokedProcessLowPriority, &sizeOfVetorBlokedProcessLowPriority, 'i');
+		indiceVetorBlokedProcessLowPriority++;
+		BlokedProcessLowPriority[indiceVetorBlokedProcessLowPriority] = indice;
+	}
+	else if (priority == NORMAL_PRIORITY) {
+		BlokedProcessNormalPriority = (int*)reallocVector(BlokedProcessNormalPriority, &indiceVetorBlokedProcessNormalPriority, &sizeOfVetorBlokedProcessNormalPriority, 'i');
+		indiceVetorBlokedProcessNormalPriority++;
+		BlokedProcessNormalPriority[indiceVetorBlokedProcessNormalPriority] = indice;
+	}
+	else if (priority == HIGH_PRIORITY) {
+		BlokedProcessHighPriority = (int*)reallocVector(BlokedProcessHighPriority, &indiceVetorBlokedProcessHighPriority, &sizeOfVetorBlokedProcessHighPriority, 'i');
+		indiceVetorBlokedProcessHighPriority++;
+		BlokedProcessHighPriority[indiceVetorBlokedProcessHighPriority] = indice;
+	}
+}
+
+void processBlokedRemoveQueUE(int indice) { //remove o indice do elemento desejado da lista de processos bloqueados
+	int priority = tabelaPCB[indice].priority;
+	if (priority == LOW_PRIORITY) {
+		removeFromVector(BlokedProcessLowPriority, &indice, indiceVetorBlokedProcessLowPriority, 'i');
+		indiceVetorBlokedProcessLowPriority--;
+	}
+	else if (priority == NORMAL_PRIORITY) {
+		removeFromVector(BlokedProcessNormalPriority, &indice, indiceVetorBlokedProcessNormalPriority, 'i');
+		indiceVetorBlokedProcessNormalPriority--;
+	}
+	else if (priority == HIGH_PRIORITY) {
+		removeFromVector(BlokedProcessHighPriority, &indice, indiceVetorBlokedProcessHighPriority, 'i');
+		indiceVetorBlokedProcessHighPriority--;
+	}
+}
+
 PCB* getLastElementOfPCBTable()
 {
 	return &tabelaPCB[indiceOfVetorTabelaPCB+1];
 }
-
 
 void contextChange(int indice) {
 	_CPU.currentTime = 0;
@@ -146,21 +173,21 @@ void contextChange(int indice) {
 	_CPU.VariavelManipulada = &(tabelaPCB[indice]._ProcessoSimulado->VariavelManipulada);
 }
 
-int scheduler(int priorityEspecific) {
+int scheduler() {
 	if (indiceVetorReadyProcessHighPriority >= 0) {
-		int indice = ReadyProcessHighPriority[indiceVetorReadyProcessHighPriority];
+		int indice = ReadyProcessHighPriority[0];
 		indiceVetorReadyProcessHighPriority--;
 		tabelaPCB[indice].priority = NORMAL_PRIORITY;
 		return indice;
 	}
 	else if(indiceVetorReadyProcessNormalPriority >= 0){
-		int indice = ReadyProcessNormalPriority[indiceVetorReadyProcessNormalPriority];
+		int indice = ReadyProcessNormalPriority[0];
 		indiceVetorReadyProcessNormalPriority--;
 		tabelaPCB[indice].priority = LOW_PRIORITY;
 		return indice;
 	}
 	else if (indiceVetorReadyProcessLowPriority >= 0) {
-		int indice = ReadyProcessLowPriority[indiceVetorReadyProcessLowPriority];
+		int indice = ReadyProcessLowPriority[0];
 		indiceVetorReadyProcessLowPriority--;
 		return indice;
 	}
@@ -172,7 +199,7 @@ int scheduler(int priorityEspecific) {
 void createNewProcess(PCB* pcbCalled, int priority) { //cria um novo processo e coloca o indice na lista de processos prontos
 	processoSimulado* newProcess = (processoSimulado*)malloc(sizeof(processoSimulado) * 1); //Cria uma nova estrutura que representa um novo processo
 
-	reallocVector(tabelaPCB, &indiceOfVetorTabelaPCB, &sizeOfVetorTabelaPCB, 'p');
+	tabelaPCB = (PCB*)reallocVector(tabelaPCB, &indiceOfVetorTabelaPCB, &sizeOfVetorTabelaPCB, 'p');
 	PCB* LastElementOfPCBTable = getLastElementOfPCBTable();
 	printf("\nIndice antes incremento:%d ", indiceOfVetorTabelaPCB);
 	indiceOfVetorTabelaPCB++;
@@ -206,8 +233,6 @@ void createNewProcess(PCB* pcbCalled, int priority) { //cria um novo processo e 
 	processReadyQueUE(indiceOfVetorTabelaPCB);
 }
 
-
-
 PCB* initiManager() {
 	_CPU.currentTime = 0;
 	tabelaPCB = (PCB*)malloc(sizeof(PCB) * sizeOfVetorTabelaPCB);
@@ -222,22 +247,46 @@ PCB* initiManager() {
 
 	tabelaPCB[indiceOfVetorTabelaPCB+1].ID = -1;
 	createNewProcess(&tabelaPCB[indiceOfVetorTabelaPCB+1], NORMAL_PRIORITY);
-
+	*(tabelaPCB[indiceOfVetorTabelaPCB+1]._ProcessoSimulado->programInstructionsList) = readFile("init.txt");
+	contextChange(scheduler());
 	return tabelaPCB;
 }
 
 int main() {
-	char teste;
-	scanf("%c", &teste);
-	PCB* _PCB = initiManager(); // retorna o vetor de structs PCB
-	createNewProcess(_PCB, NORMAL_PRIORITY);
-	printf("\nIndice do vetor de prontos: %d\n", ReadyProcessNormalPriority[indiceVetorReadyProcessNormalPriority]);
-	printf("\nId do elemento PCB: %d\n", _PCB[indiceOfVetorTabelaPCB].ID);
-	processReadyRemoveQueUE(ReadyProcessNormalPriority[indiceVetorReadyProcessNormalPriority]);
-	popBackVector(_PCB, &_PCB[1], indiceOfVetorTabelaPCB, 'p');
-	printf("indice da tabela PCB apos decremento: %d", indiceOfVetorTabelaPCB);
-	printf("\nID: %d", _PCB[indiceOfVetorTabelaPCB].ID);
-	//printf("\nTeste bem sucedido: %c\n", teste);
-	//getc(stdin);
+	int* pipefd;
+	if (childpid == 0) {
+		close(pipefd[1]);
+		redirecionarEntrada(pipefd, STDIN_FILENO, 0);
+		execlp("./processReporter", "./processReporter", NULL);
+	}
+	PCB* _tabelaPCB = initiManager(); // Array das entradas na tabela PCB
+	char command;
+	scanf("%c", &command);
+	while (strcmp(&command, "T") != 0)
+	{
+		switch (command)
+		{
+		case 'Q':
+			execInstruction(&_CPU);
+			break;
+		case 'U':
+			processBlokedQueUE(0);
+			break;
+		case 'P':
+			pipefd = criarpipe();
+			childpid = criarFork();
+			close(pipefd[0]);
+			write(pipefd[1], sizeof(tabelaPCB[ExecutingProcess]), sizeof(int));
+			write(pipefd[1], &tabelaPCB[ExecutingProcess], sizeof(tabelaPCB[ExecutingProcess]));
+			close(pipefd[1]);
+			break;
+		case 'T':
+			//cria reporter
+			exit(0);
+		default:
+			printf("\nComando não econtrado\n");
+			break;
+		}
+	}
 	return 0;
 }

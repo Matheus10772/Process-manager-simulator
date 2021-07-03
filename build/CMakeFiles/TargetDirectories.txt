@@ -1,0 +1,5 @@
+/mnt/d/Estudos/Faculdade/SO/Process manager simulator/build/CMakeFiles/rebuild_cache.dir
+/mnt/d/Estudos/Faculdade/SO/Process manager simulator/build/CMakeFiles/edit_cache.dir
+/mnt/d/Estudos/Faculdade/SO/Process manager simulator/build/CMakeFiles/Reporter.dir
+/mnt/d/Estudos/Faculdade/SO/Process manager simulator/build/CMakeFiles/ProcessManager.dir
+/mnt/d/Estudos/Faculdade/SO/Process manager simulator/build/CMakeFiles/ProcessCommander.dir

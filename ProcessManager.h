@@ -25,7 +25,6 @@ typedef struct CPU {
 	char*** programInstructionsList; //Lista de instru��es do processo
 	int ProgramCounter; //(Tempo total)Carrega da tabela PCB o tempo do processo
 	int* VariavelManipulada; //Carrega o valor do processo simulado
-	//unsigned long int tempoTotal;
 	unsigned long int currentTime; //Inicia do zero sempre que um novo processo for colocado em execu��o
 }CPU;
 
@@ -33,11 +32,6 @@ typedef struct processosSimulado { //Struct que representa o processo simulado
 	int VariavelManipulada;
 	char*** programInstructionsList;
 }processoSimulado;
-
-/*typedef struct tiposSimulado {
-	char tipo;
-	char* valor;
-}tipoSimulado;*/
 
 typedef struct PCB {
 	int ID;
@@ -86,23 +80,26 @@ int ExecutingProcess;
 int getNewID();
 void removeID(int ID);
 void* reallocVector(void* vetor, int* indice, int* valorMaximo, char tipo);
-void* popBackVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo);
+void removeFromVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo);
 void processReadyQueUE(int indice);
 void processReadyRemoveQueUE(int indice);
 void processBlokedQueUE(int indice);
 void processBlokedRemoveQueUE(int indice);
 PCB* getLastElementOfPCBTable();
-void createNewProcess(PCB* pcbCalled, int priority);
-int scheduler(int priorityEspecific);
 void contextChange(int indice);
+int scheduler();
+void createNewProcess(PCB* pcbCalled, int priority);
 PCB* initiManager();
-//void blockProcess();
 
 //Processo Simulado
 
-//PCB * processo(char *programa);
-//void atualizar_valor(PCB * aux);
-//void adicionar_valor(PCB * aux);
-//void subtrair_valor(PCB * aux);
-//int valor_prioridade(tipoSimulado ** simulado);
-//tipoSimulado** instrucoes(char *nome);
+void updateValue(CPU* __CPU, int n);
+void sumValue(CPU* __CPU, int n);
+void subtractValue(CPU* __CPU, int n);
+char** splitString(char* string);
+void execInstruction(CPU* __CPU);
+void finishUnitTime(CPU* __CPU);
+void blockExecutingProcess(CPU* __CPU, int indice);
+void finishExecutingProcess(int indice);
+char** readFile(char arqName[]);
+void replaceProgramList(CPU* __CPU, char arqName[]);

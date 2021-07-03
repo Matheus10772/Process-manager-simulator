@@ -56,7 +56,7 @@ int* inicializarCommander() {
     printf("\nChild pid: %d\n", childpid);
     if (childpid == 0) {
         printf("\nProcessando filho\n");
-        //close(pipefd[1]);
+        close(pipefd[1]);
         redirecionarEntrada(pipefd, STDIN_FILENO, 0);
         execlp("./ProcessManager", "./ProcessManager", NULL); //Substitui o código do processo filho pelo código desejado
     }

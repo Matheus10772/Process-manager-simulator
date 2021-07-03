@@ -1,4 +1,5 @@
 #include "ProcessManager.h"
+const char arqName[] = { "Exemplo1.txt" };
 
 //Seta o valor da variavel para instrução do tipo S, atualizando o valor para N
 void updateValue(CPU* __CPU, int n){
@@ -36,14 +37,31 @@ void execInstruction(CPU* __CPU) {
 	case 'S':
 		updateValue(__CPU, atoi(executar[1]));
 		break;
-	case ''
+	case 'A':
+		sumValue(__CPU, atoi(executar[1]));
+		break;
+	case 'D':
+		subtractValue(__CPU, atoi(executar[1]));
+		break;
+	case 'B':
+		blockExecutingProcess(__CPU, ExecutingProcess);
+		break;
+	case 'E':
+		finishExecutingProcess(ExecutingProcess);
+		break;
+	case 'F':
+		createNewProcess(&(tabelaPCB[ExecutingProcess]), NORMAL_PRIORITY);
+		break; 
+	case 'R':
+		replaceProgramList(__CPU, executar[1]);
 	default:
+		printf("\nComando não encontrado\n");
 		break;
 	}
 }
 
 void finishUnitTime(CPU* __CPU) {
-    //Execute a instrução do processo atualmente em execução
+	execInstruction(__CPU);
 	__CPU->Programcounter++;
 	tempo++;
 	__CPU->currentTime++;
@@ -53,22 +71,25 @@ void finishUnitTime(CPU* __CPU) {
 void blockExecutingProcess(CPU* __CPU, int indice) {
     processBlokedQueUE(indice);
     tabelaPCB[indice].ProgramCounter = __CPU->ProgramCounter;
+	tabelaPCB[indice].priority = HIGH_PRIORITY;
     tabelaPCB[indice].totalElapsedTime += __CPU->currentTime;
     tabelaPCB[indice].status += BLOKED_STATUS;
 	ExecutingProcess = scheduler();
 	contextChange(ExecutingProcess);
 }
 
-
 void finishExecutingProcess(int indice) {
 	removeID(tabelaPCB[indice].ID);
-    popBackVector(tabelaPCB, tabelaPCB[indice], indiceOfVetorTabelaPCB, 'p');
+    removeFromVector(tabelaPCB, &(tabelaPCB[indice]), indiceOfVetorTabelaPCB, 'p');
 	ExecutingProcess = scheduler();
 	contextChange(ExecutingProcess);
 }
 
 char** readFile(char arqName[]) {
-	FILE* arq = fopen(arqName, "r");
+	char* _arqName = (char*)malloc(strlen(arqName) + 2);
+	sprintf(_arqName, "%s", "./");
+	strcat(_arqName, arqName);
+	FILE* arq = fopen(_arqName, "r");
 	char** linhas = (char**)malloc(sizeof(char*) * 1024);
 	char linha[1024];
 	unsigned int indice = 0;
@@ -87,4 +108,3 @@ void replaceProgramList(CPU* __CPU, char arqName[]) {
 	__CPU->ProgramCounter = 0;
 	*(__CPU->VariavelManipulada) = 0;
 }
-
