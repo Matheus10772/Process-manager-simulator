@@ -5,6 +5,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <sys/types.h>
 
 const short int LOW_PRIORITY = 50;
@@ -22,7 +23,7 @@ int recycleIDcount = 0;
 unsigned long int tempo = 0;
 
 typedef struct CPU {
-	char*** programInstructionsList; //Lista de instru��es do processo
+	char** programInstructionsList; //Lista de instru��es do processo
 	int ProgramCounter; //(Tempo total)Carrega da tabela PCB o tempo do processo
 	int* VariavelManipulada; //Carrega o valor do processo simulado
 	unsigned long int currentTime; //Inicia do zero sempre que um novo processo for colocado em execu��o
@@ -30,7 +31,7 @@ typedef struct CPU {
 
 typedef struct processosSimulado { //Struct que representa o processo simulado
 	int VariavelManipulada;
-	char*** programInstructionsList;
+	char** programInstructionsList;
 }processoSimulado;
 
 typedef struct PCB {
@@ -82,9 +83,9 @@ void removeID(int ID);
 void* reallocVector(void* vetor, int* indice, int* valorMaximo, char tipo);
 void removeFromVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo);
 void processReadyQueUE(int indice);
-void processReadyRemoveQueUE(int indice);
+int processReadyRemoveQueUE(int indice, int priority);
 void processBlokedQueUE(int indice);
-void processBlokedRemoveQueUE(int indice);
+int processBlokedRemoveQueUE(int indice, int priority);
 PCB* getLastElementOfPCBTable();
 void contextChange(int indice);
 int scheduler();
@@ -103,3 +104,4 @@ void blockExecutingProcess(CPU* __CPU, int indice);
 void finishExecutingProcess(int indice);
 char** readFile(char arqName[]);
 void replaceProgramList(CPU* __CPU, char arqName[]);
+void sendForReporter(int indice, int pipefd);
