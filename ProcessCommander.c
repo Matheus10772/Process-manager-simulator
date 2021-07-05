@@ -65,10 +65,7 @@ int* inicializarCommander() {
         if (escolha == 0)
             exit(1);
     }
-    printf("\nFork feito\n");
-    printf("\nChild pid: %d\n", childpid);
     if (childpid == 0) {
-        printf("\nProcessando filho\n");
         close(pipefd[1]);
         redirecionarEntrada(pipefd, STDIN_FILENO, 0);
         execlp("./ProcessManager", "./ProcessManager", NULL); //Substitui o código do processo filho pelo código desejado
@@ -88,7 +85,7 @@ int main() {
     }
     while (command != 'T')
     {
-        SystemPause();
+        sleep(1.5);
         //ClearScreen();
         printf("\nDigite o comando desejado:");
         printf("\nQ: Para colocar fim em uma unidade de tempo."
@@ -96,7 +93,8 @@ int main() {
                "\nP: Para imprimir o estado atual do sistema."
                "\nT: Imprimi o tempo de retorno médio e, em seguida, finaliza o simulador\n"
         );
-        scanf("%c", &command);
+        //scanf("%c", &command);
+        command = fgetc(stdin);
         /*if (!(command == 'Q' || command == 'U' || command == 'P' || command == 'T')) {
             printf("\nComando não encontrado\n");
             SystemPause();
@@ -104,7 +102,6 @@ int main() {
         command = (char)toupper(command);
         write(pipefd[1], &command, 1);
         setbuf(stdin, NULL);
-        //SystemPause();
     }
     return 0;
 }

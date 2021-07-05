@@ -4,12 +4,6 @@ const int PIPE_FALIED_VALUE = -1;
 const int FORK_FALIED_VALUE = -1;
 pid_t  childpid = -1;
 
-void SystemPause() {
-	setbuf(stdin, NULL);
-	printf("\nPressione qualquer tecla para continuar.\n");
-	getchar();
-	setbuf(stdin, NULL);
-}
 
 int* criarpipe() { //Função usada para criar um pipe com o processo filho
 	int* pipefd = (int*)malloc(sizeof(int) * 2);
@@ -54,13 +48,13 @@ void removeID(int ID) {//Adiciona o ID de um processo que foi finalizado ao veto
 }
 
 void* reallocVector(void* vetor, int* indice, int* valorMaximo, char tipo) {//Ralocar o tamanho do vetor, caso seja necessário
-	if (strcmp(&tipo, "i") == 0) {
+	if (tipo == 'i') {
 		if ((*indice) == (*valorMaximo) - 1) {
 			(*valorMaximo) = (*valorMaximo) + 128;
 			vetor = realloc((int*)vetor, (*valorMaximo)*sizeof(int));
 		}
 	}
-	else if (strcmp(&tipo, "p") == 0) {
+	else if (tipo == 'p') {
 		if ((*indice) == (*valorMaximo) - 1) {
 			(*valorMaximo) = (*valorMaximo) + 128;
 			vetor = realloc((PCB*)vetor, (*valorMaximo)*sizeof(PCB));
@@ -70,29 +64,44 @@ void* reallocVector(void* vetor, int* indice, int* valorMaximo, char tipo) {//Ra
 }
 
 void removeFromVector(const void* vetor, void* valueOfremove, int indiceMaximo, char tipo) {//Remove um determinado elemento de um vetor e puxa os itens remanescente para as primeiras posições
-																							//De modo a não ficar "buracos" no vetor
-	if (strcmp(&tipo, "i") == 0) {
+	  																					    //De modo a não ficar "buracos" no vetor
+	if (tipo == 'i') {
 		int* _vetor = (int*)vetor;
-		int i;
-		for (i = 0; i < indiceMaximo; i++) {
+		int i = 0;
+		for (i = 0; i <= indiceMaximo; i++) {
 			if (_vetor[i] == *((int*)valueOfremove)) {
 				int j;
-				for (j = i; j < indiceMaximo - 1; j++) {
+				for (j = i; j <= indiceMaximo - 1; j++) {
 					_vetor[j] = _vetor[j + 1];
 				}
+				break;
 			}
 		}
 	}
-	else if (strcmp(&tipo, "p") == 0) {
+	else if (tipo == 'p') {
 		PCB* _vetor = (PCB*)vetor;
 		int i;
-		for (i = 0; i < indiceMaximo; i++) {
+		for (i = 0; i <= indiceMaximo; i++) {
 			if (_vetor[i].ID == ((PCB*)valueOfremove)->ID) {
 				int j;
-				for (j = i; j < indiceMaximo - 1; j++) {
+				for (j = i; j <= indiceMaximo - 1; j++) {
 					memcpy(&(_vetor[i]), &(_vetor[i + 1]), sizeof(PCB));
 				}
 				indiceOfVetorTabelaPCB--;
+				break;
+			}
+		}
+	}
+	else if (tipo == 'c') {
+		char* _vetor = (char*)vetor;
+		int i = 0;
+		for (i = 0; i <= indiceMaximo; i++) {
+			if (_vetor[i] == *((char*)valueOfremove)) {
+				int j;
+				for (j = i; j <= indiceMaximo - 1; j++) {
+					_vetor[j] = _vetor[j + 1];
+				}
+				break;
 			}
 		}
 	}
@@ -109,7 +118,6 @@ void processReadyQueUE(int indice) { //Coloca o indice do elemento desejado na l
 	else if (priority == NORMAL_PRIORITY) {
 		ReadyProcessNormalPriority = (int*)reallocVector(ReadyProcessNormalPriority, &indiceVetorReadyProcessNormalPriority, &sizeOfVetorReadyProcessNormalPriority, 'i');
 		indiceVetorReadyProcessNormalPriority++;
-		printf("Colocando na fila: %d", indiceVetorReadyProcessNormalPriority);
 		ReadyProcessNormalPriority[indiceVetorReadyProcessNormalPriority] = indice;
 	}
 	else if (priority == HIGH_PRIORITY) {
@@ -123,19 +131,19 @@ int processReadyRemoveQueUE(int indice, int priority) {//Remove o indice do elem
 	int processo;
 	if (priority == LOW_PRIORITY) {
 		processo = ReadyProcessLowPriority[indice];
-		removeFromVector(ReadyProcessLowPriority, &indice, indiceVetorReadyProcessLowPriority, 'i');
+		removeFromVector(ReadyProcessLowPriority, &processo, indiceVetorReadyProcessLowPriority, 'i');
 		indiceVetorReadyProcessLowPriority--;
 		return processo;
 	}
 	else if (priority == NORMAL_PRIORITY) {
 		processo = ReadyProcessNormalPriority[indice];
-		removeFromVector(ReadyProcessNormalPriority, &indice, indiceVetorReadyProcessNormalPriority, 'i');
+		removeFromVector(ReadyProcessNormalPriority, &processo, indiceVetorReadyProcessNormalPriority, 'i');
 		indiceVetorReadyProcessNormalPriority--;
 		return processo;
 	}
 	else if (priority == HIGH_PRIORITY) {
 		processo = ReadyProcessHighPriority[indice];
-		removeFromVector(ReadyProcessHighPriority, &indice, indiceVetorReadyProcessHighPriority, 'i');
+		removeFromVector(ReadyProcessHighPriority, &processo, indiceVetorReadyProcessHighPriority, 'i');
 		indiceVetorReadyProcessHighPriority--;
 		return processo;
 	}
@@ -164,19 +172,19 @@ int processBlokedRemoveQueUE(int indice, int priority) { //remove o indice do el
 	int processo;
 	if (priority == LOW_PRIORITY) {
 		processo = BlokedProcessLowPriority[indice];
-		removeFromVector(BlokedProcessLowPriority, &indice, indiceVetorBlokedProcessLowPriority, 'i');
+		removeFromVector(BlokedProcessLowPriority, &processo, indiceVetorBlokedProcessLowPriority, 'i');
 		indiceVetorBlokedProcessLowPriority--;
 		return processo;
 	}
 	else if (priority == NORMAL_PRIORITY) {
 		processo = BlokedProcessNormalPriority[indice];
-		removeFromVector(BlokedProcessNormalPriority, &indice, indiceVetorBlokedProcessNormalPriority, 'i');
+		removeFromVector(BlokedProcessNormalPriority, &processo, indiceVetorBlokedProcessNormalPriority, 'i');
 		indiceVetorBlokedProcessNormalPriority--;
 		return processo;
 	}
 	else if (priority == HIGH_PRIORITY) {
 		processo = BlokedProcessHighPriority[indice];
-		removeFromVector(BlokedProcessHighPriority, &indice, indiceVetorBlokedProcessHighPriority, 'i');
+		removeFromVector(BlokedProcessHighPriority, &processo, indiceVetorBlokedProcessHighPriority, 'i');
 		indiceVetorBlokedProcessHighPriority--;
 		return processo;
 	}
@@ -209,8 +217,6 @@ void createNewProcess(PCB* pcbCalled, int priority) { //cria um novo processo e 
 		LastElementOfPCBTable->ProgramCounter = 0;
 	}
 	indiceOfVetorTabelaPCB++;
-	printf("\nindiceOfVetorTabelaPCB: %d\n", indiceOfVetorTabelaPCB);
-	printf("\nreadyProcessindice:%d\n", indiceVetorReadyProcessNormalPriority);
 
 	LastElementOfPCBTable->totalElapsedTime = 0;
 	LastElementOfPCBTable->_ProcessoSimulado = newProcess;
@@ -284,14 +290,10 @@ char** splitString(char* string) {//divide uma string em várias sub-strings medi
 }
 
 char** readFile(char arqName[]) {//Lê um arquivo de instruções de um processo, mediante ao fornecimento do nome do arquivo
-	char* _arqName = malloc(sizeof(char) * (strlen(arqName) + 6));
-	//sprintf(_arqName, "%s", "./");
-	strcat(_arqName, arqName);
-	printf("Arqname: %s", _arqName);
-	FILE* arq = fopen(_arqName, "rt");
+	FILE* arq = fopen(arqName, "r");
 	if (arq == NULL) {
-		printf("Não foi possível abrir o arquivo:%s", _arqName);
-		SystemPause();
+		printf("\nNão foi possível abrir o arquivo:%s", arqName);
+		//SystemPause();
 	}
 	else {
 		printf("\nSucesso\n");
@@ -311,7 +313,15 @@ char** readFile(char arqName[]) {//Lê um arquivo de instruções de um processo, m
 }
 
 void replaceProgramList(CPU* __CPU, char arqName[]) {//Substituí a lista de instruções do processo atualmente em execução
-	char** novoArquivo = readFile("instrucoes.txt");
+	char* arqNameCopia = (char*)malloc(sizeof(char) * (strlen(arqName)));
+	int j = 0;
+	for (int i = 0; i < strlen(arqName) - 2; i++) {
+		if (arqName[i] != ' ') {
+			arqNameCopia[j] = arqName[i];
+			j++;
+		}
+	}
+	char** novoArquivo = readFile(arqNameCopia);
 	__CPU->programInstructionsList = novoArquivo;
 	__CPU->ProgramCounter = 0;
 	*(__CPU->VariavelManipulada) = 0;
@@ -319,14 +329,17 @@ void replaceProgramList(CPU* __CPU, char arqName[]) {//Substituí a lista de inst
 
 void updateValue(CPU* __CPU, int n) {//Seta o valor da variavel para instrução do tipo S, atualizando o valor para N
 	*(__CPU->VariavelManipulada) = n;
+	printf("\nNovo valor: %d\n", *(__CPU->VariavelManipulada));
 }
 
 void sumValue(CPU* __CPU, int n) {// Instrução do tipo A, realiza a soma da variavel inteira mais N (Variavel  + N)
 	*(__CPU->VariavelManipulada) += n;
+	printf("\nValor da soma: %d\n", *(__CPU->VariavelManipulada));
 }
 
 void subtractValue(CPU* __CPU, int n) {// Instrução do tipo D, subtrai N da variavel inteira (Variavel - N)
 	*(__CPU->VariavelManipulada) -= n;
+	printf("\nValor da subtração: %d", *(__CPU->VariavelManipulada));
 }
 
 void execInstruction(CPU* __CPU) {//Executa a função correspondente da Lista de instruções do processo em execução
@@ -358,10 +371,6 @@ void execInstruction(CPU* __CPU) {//Executa a função correspondente da Lista de 
 		if (executar[1])
 			replaceProgramList(__CPU, executar[1]);
 	}
-	/*else {
-		printf("\nComando não encontrado2\n");
-	}*/
-
 }
 
 void finishUnitTime(CPU* __CPU) { //Incrementa o contador de programa, para executar a próxima instrução, incrementa o tempo
@@ -373,11 +382,11 @@ void finishUnitTime(CPU* __CPU) { //Incrementa o contador de programa, para exec
 }
 
 void blockExecutingProcess(CPU* __CPU, int indice) { //Bloqueia o processo atualmente em execução
+	tabelaPCB[indice].priority = HIGH_PRIORITY;
 	processBlokedQueUE(indice);
 	tabelaPCB[indice].ProgramCounter = __CPU->ProgramCounter;
-	//tabelaPCB[indice].priority = HIGH_PRIORITY;
 	tabelaPCB[indice].totalElapsedTime += __CPU->currentTime;
-	tabelaPCB[indice].status += BLOKED_STATUS;
+	tabelaPCB[indice].status = BLOKED_STATUS;
 	ExecutingProcess = scheduler();
 	contextChange(ExecutingProcess);
 }
@@ -387,8 +396,8 @@ void finishExecutingProcess(int indice) {//Finaliza o processo atualemente em ex
 	removeFromVector(tabelaPCB, &(tabelaPCB[indice]), indiceOfVetorTabelaPCB, 'p');
 	ExecutingProcess = scheduler();
 	if (!ExecutingProcess) {
-		/*printf("\nNão existe mais processos para serem escalonados. Encerrando\n");
-		exit(1);*/
+		printf("\nNão existe mais processos para serem escalonados. Encerrando\n");
+		exit(1);
 	}
 	contextChange(ExecutingProcess);
 }
@@ -433,10 +442,9 @@ int main() {
 
 	while (command != 'T')
 	{
-		setbuf(stdin, NULL);
-		//fflush(stdin);
-		printf("\nDigite o comando\n");
-		scanf("%c", &command);
+		//setbuf(stdin, NULL);
+		//scanf("%c", &command);
+		command = fgetc(stdin);
 		if (command == 'Q') {
 			finishUnitTime(&_CPU);
 		}
@@ -458,51 +466,6 @@ int main() {
 			}
 		}
 		else if (command == 'P' || command == 'T') {
-			/*printf("****************************************************************\n"
-				"                       Estado do sistema:                       \n"
-				"****************************************************************\n"
-				"Tempo Atual: %ld\n", tempo);
-			printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[ExecutingProcess].ID, tabelaPCB[ExecutingProcess].parentID, tabelaPCB[ExecutingProcess].priority, tabelaPCB[ExecutingProcess]._ProcessoSimulado->VariavelManipulada, tabelaPCB[ExecutingProcess].startTime, tabelaPCB[ExecutingProcess].totalElapsedTime);
-			printf("BLOQUEADOS:\n");
-			int i;
-			if (indiceVetorBlokedProcessLowPriority >= 0) {
-				for (i = 0; i <= indiceVetorBlokedProcessLowPriority; i++) {
-					printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[BlokedProcessLowPriority[i]].ID, tabelaPCB[BlokedProcessLowPriority[i]].parentID, tabelaPCB[BlokedProcessLowPriority[i]].priority, tabelaPCB[BlokedProcessLowPriority[i]]._ProcessoSimulado->VariavelManipulada, tabelaPCB[BlokedProcessLowPriority[i]].startTime, tabelaPCB[BlokedProcessLowPriority[i]].totalElapsedTime);
-				}
-			}
-
-			if (indiceVetorBlokedProcessNormalPriority >= 0) {
-				for (i = 0; i <= indiceVetorBlokedProcessNormalPriority; i++) {
-					printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[BlokedProcessNormalPriority[i]].ID, tabelaPCB[BlokedProcessNormalPriority[i]].parentID, tabelaPCB[BlokedProcessNormalPriority[i]].priority, tabelaPCB[BlokedProcessNormalPriority[i]]._ProcessoSimulado->VariavelManipulada, tabelaPCB[BlokedProcessNormalPriority[i]].startTime, tabelaPCB[BlokedProcessNormalPriority[i]].totalElapsedTime);
-				}
-			}
-
-			if (indiceVetorBlokedProcessHighPriority >= 0) {
-				for (i = 0; i <= indiceVetorBlokedProcessHighPriority; i++) {
-					printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[BlokedProcessHighPriority[i]].ID, tabelaPCB[BlokedProcessHighPriority[i]].parentID, tabelaPCB[BlokedProcessHighPriority[i]].priority, tabelaPCB[BlokedProcessHighPriority[i]]._ProcessoSimulado->VariavelManipulada, tabelaPCB[BlokedProcessHighPriority[i]].startTime, tabelaPCB[BlokedProcessHighPriority[i]].totalElapsedTime);
-				}
-			}
-			printf("PRONTOS:\n");
-
-			if (indiceVetorReadyProcessLowPriority >= 0) {
-				for (i = 0; i <= indiceVetorReadyProcessLowPriority; i++) {
-					printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[ReadyProcessLowPriority[i]].ID, tabelaPCB[ReadyProcessLowPriority[i]].parentID, tabelaPCB[ReadyProcessLowPriority[i]].priority, tabelaPCB[ReadyProcessLowPriority[i]]._ProcessoSimulado->VariavelManipulada, tabelaPCB[ReadyProcessLowPriority[i]].startTime, tabelaPCB[ReadyProcessLowPriority[i]].totalElapsedTime);
-				}
-			}
-
-			if (indiceVetorReadyProcessNormalPriority >= 0) {
-				for (i = 0; i <= indiceVetorReadyProcessNormalPriority; i++) {
-					printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[ReadyProcessNormalPriority[i]].ID, tabelaPCB[ReadyProcessNormalPriority[i]].parentID, tabelaPCB[ReadyProcessNormalPriority[i]].priority, tabelaPCB[ReadyProcessNormalPriority[i]]._ProcessoSimulado->VariavelManipulada, tabelaPCB[ReadyProcessNormalPriority[i]].startTime, tabelaPCB[ReadyProcessNormalPriority[i]].totalElapsedTime);
-				}
-			}
-
-			if (indiceVetorReadyProcessHighPriority >= 0) {
-				for (i = 0; i <= indiceVetorReadyProcessHighPriority; i++) {
-					printf("%d, %d, %d, %d, %ld, %ld\n", tabelaPCB[ReadyProcessHighPriority[i]].ID, tabelaPCB[ReadyProcessHighPriority[i]].parentID, tabelaPCB[ReadyProcessHighPriority[i]].priority, tabelaPCB[ReadyProcessHighPriority[i]]._ProcessoSimulado->VariavelManipulada, tabelaPCB[ReadyProcessHighPriority[i]].startTime, tabelaPCB[ReadyProcessHighPriority[i]].totalElapsedTime);
-				}
-			}
-
-			printf("****************************************************************\n");*/
 			pipefd = criarpipe();
 			childpid = criarFork();
 			if (childpid == 0) {

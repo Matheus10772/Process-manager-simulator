@@ -4,13 +4,13 @@ A 20
 D 23
 A 55
 F 1
-R file_a
+R instrucoes.txt
 F 1
-R file_b
+R instrucoes2.txt
 F 1
-R file_c
+R instrucoes3.txt
 F 1
-R file_d
+R instrucoes4.txt
 F 1
-R file_e
+R instrucoes5.txt
 E

@@ -31,7 +31,7 @@ void printRemindReporter() {
 	else if (elementoPCB.priority == HIGH_PRIORITY) {
 		sprintf(prioridade, "%s", "Prioridade alta");
 	}
-	printf("%d, %d, %s, %d, %ld, %ld\n", elementoPCB.ID, elementoPCB.parentID, prioridade, variavelManipulada, elementoPCB.startTime, elementoPCB.totalElapsedTime);
+	printf("pid: %d, ppid: %d, %s, valor: %d, tempo inicio: %ld, CPU usada até agora: %ld\n", elementoPCB.ID, elementoPCB.parentID, prioridade, variavelManipulada, elementoPCB.startTime, elementoPCB.totalElapsedTime);
 }
 
 int main() {
@@ -39,9 +39,9 @@ int main() {
 	ClearScreen();
 	unsigned long int tempo;
 	read(STDIN_FILENO, &tempo, sizeof(unsigned long int));
-	printf("****************************************************************\n"
-		   "                       Estado do sistema:                       \n"
-		   "****************************************************************\n"
+	printf("************************************************************************************************\n"
+		   "                                  Estado do sistema:								            \n"
+		   "************************************************************************************************\n"
 		   "Tempo Atual: %ld\n", tempo);
 	printRemindReporter();
 	int i;	
