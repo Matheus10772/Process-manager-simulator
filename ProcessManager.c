@@ -344,6 +344,7 @@ void subtractValue(CPU* __CPU, int n) {// Instrução do tipo D, subtrai N da vari
 
 void execInstruction(CPU* __CPU) {//Executa a função correspondente da Lista de instruções do processo em execução
 	char** executar = splitString(__CPU->programInstructionsList[__CPU->ProgramCounter]);
+	__CPU->ProgramCounter++;
 	executar[0][0] = (char)toupper(executar[0][0]);
 	printf("\nExecutando instrução: %c\n", executar[0][0]);
 	if (executar[0][0] == 'S') {
@@ -375,9 +376,8 @@ void execInstruction(CPU* __CPU) {//Executa a função correspondente da Lista de 
 
 void finishUnitTime(CPU* __CPU) { //Incrementa o contador de programa, para executar a próxima instrução, incrementa o tempo
 								  //e o tempo de CPU pelo processo atualmente em execução
-	execInstruction(__CPU);
-	__CPU->ProgramCounter++;
 	tempo++;
+	execInstruction(__CPU);
 	__CPU->currentTime++;
 }
 
@@ -521,8 +521,6 @@ int main() {
 			}
 
 			write(pipefd[1], &indiceVetorReadyProcessNormalPriority, sizeof(int));
-			printf("ready: %d", indiceVetorReadyProcessNormalPriority);
-			printf("ID para executar: %d", tabelaPCB[ReadyProcessNormalPriority[0]].ID);
 			if (indiceVetorReadyProcessNormalPriority >= 0) {
 				for (i = 0; i <= indiceVetorReadyProcessNormalPriority; i++) {
 					sendForReporter(ReadyProcessNormalPriority[i], pipefd);
