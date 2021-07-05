@@ -4,6 +4,13 @@ const int PIPE_FALIED_VALUE = -1;
 const int FORK_FALIED_VALUE = -1;
 pid_t  childpid = -1;
 
+void SystemPause() {
+	setbuf(stdin, NULL);
+	printf("\nPressione qualquer tecla para continuar.\n");
+	getchar();
+	setbuf(stdin, NULL);
+}
+
 int* criarpipe() { //Função usada para criar um pipe com o processo filho
 	int* pipefd = (int*)malloc(sizeof(int) * 2);
 	int* statusvalue = (int*)malloc(sizeof(int) * 1);
@@ -182,9 +189,10 @@ PCB* getLastElementOfPCBTable() {//Retorna o último elemento do vetor de tabela 
 void createNewProcess(PCB* pcbCalled, int priority) { //cria um novo processo e coloca o indice na lista de processos prontos
 	processoSimulado* newProcess = (processoSimulado*)malloc(sizeof(processoSimulado) * 1); //Cria uma nova estrutura que representa um novo processo
 	tabelaPCB = (PCB*)reallocVector(tabelaPCB, &indiceOfVetorTabelaPCB, &sizeOfVetorTabelaPCB, 'p');
+
 	PCB* LastElementOfPCBTable = getLastElementOfPCBTable();
-	indiceOfVetorTabelaPCB++;
-	if (pcbCalled->ID != -1) //Se passar nesse teste, significa que não é o primeiro elemento da tabela PCB
+
+	if (indiceOfVetorTabelaPCB-1 >= 0) //Se passar nesse teste, significa que não é o primeiro elemento da tabela PCB
 	{
 		newProcess->VariavelManipulada = (pcbCalled->_ProcessoSimulado)->VariavelManipulada;
 		newProcess->programInstructionsList = pcbCalled->_ProcessoSimulado->programInstructionsList;
@@ -194,13 +202,13 @@ void createNewProcess(PCB* pcbCalled, int priority) { //cria um novo processo e 
 	}
 	else //Significa que é o primeiro elemento da tabela PCB
 	{
-		;
 		//LastElementOfPCBTable = pcbCalled;
-		newProcess->programInstructionsList = readFile("init"); //conferir isso
+		newProcess->programInstructionsList = readFile("init.txt"); //conferir isso
 		newProcess->VariavelManipulada = 0;
 		LastElementOfPCBTable->parentID = -1;
 		LastElementOfPCBTable->ProgramCounter = 0;
 	}
+	indiceOfVetorTabelaPCB++;
 
 	LastElementOfPCBTable->totalElapsedTime = 0;
 	LastElementOfPCBTable->_ProcessoSimulado = newProcess;
@@ -226,6 +234,32 @@ int scheduler() {//Retorna o indice de algum processo que deve ser escalado, ou 
 	}
 	else if (indiceVetorReadyProcessLowPriority >= 0) {
 		int indice = processReadyRemoveQueUE(0, LOW_PRIORITY);
+		indiceVetorReadyProcessLowPriority--;
+		return indice;
+	}
+	else if (indiceVetorBlokedProcessHighPriority >= 0) {
+		int indice = processBlokedRemoveQueUE(0, HIGH_PRIORITY);
+		indiceVetorBlokedProcessHighPriority--;
+		processReadyQueUE(indice);
+		indice = processReadyRemoveQueUE(0, HIGH_PRIORITY);
+		indiceVetorReadyProcessHighPriority--;
+		tabelaPCB[indice].priority = NORMAL_PRIORITY;
+		return indice;
+	}
+	else if (indiceVetorBlokedProcessNormalPriority >= 0) {
+		int indice = processBlokedRemoveQueUE(0, NORMAL_PRIORITY);
+		indiceVetorBlokedProcessNormalPriority--;
+		processReadyQueUE(indice);
+		indice = processReadyRemoveQueUE(0, NORMAL_PRIORITY);
+		indiceVetorReadyProcessNormalPriority--;
+		tabelaPCB[indice].priority = LOW_PRIORITY;
+		return indice;
+	}
+	else if (indiceVetorBlokedProcessLowPriority >= 0) {
+		int indice = processBlokedRemoveQueUE(0, LOW_PRIORITY);
+		indiceVetorBlokedProcessLowPriority--;
+		processReadyQueUE(indice);
+		indice = processReadyRemoveQueUE(0, LOW_PRIORITY);
 		indiceVetorReadyProcessLowPriority--;
 		return indice;
 	}
@@ -257,12 +291,13 @@ char** splitString(char* string) {//divide uma string em várias sub-strings medi
 
 char** readFile(char arqName[]) {//Lê um arquivo de instruções de um processo, mediante ao fornecimento do nome do arquivo
 	char* _arqName = malloc(sizeof(char) * (strlen(arqName) + 6));
-	sprintf(_arqName, "%s", "./");
+	//sprintf(_arqName, "%s", "./");
 	strcat(_arqName, arqName);
-	strcat(_arqName, ".txt");
-	FILE* arq = fopen(_arqName, "r");
+	printf("Arqname: %s", _arqName);
+	FILE* arq = fopen(_arqName, "rt");
 	if (arq == NULL) {
-		printf("Não foi possível abrir o arquivo: %s", _arqName);
+		printf("Não foi possível abrir o arquivo:%s", _arqName);
+		SystemPause();
 	}
 	else {
 		printf("\nSucesso\n");
@@ -277,11 +312,12 @@ char** readFile(char arqName[]) {//Lê um arquivo de instruções de um processo, m
 		indice++;
 	}
 
+	fclose(arq);
 	return linhas;
 }
 
 void replaceProgramList(CPU* __CPU, char arqName[]) {//Substituí a lista de instruções do processo atualmente em execução
-	char** novoArquivo = readFile(arqName);
+	char** novoArquivo = readFile("instrucoes.txt");
 	__CPU->programInstructionsList = novoArquivo;
 	__CPU->ProgramCounter = 0;
 	*(__CPU->VariavelManipulada) = 0;
@@ -351,6 +387,10 @@ void finishExecutingProcess(int indice) {//Finaliza o processo atualemente em ex
 	removeID(tabelaPCB[indice].ID);
 	removeFromVector(tabelaPCB, &(tabelaPCB[indice]), indiceOfVetorTabelaPCB, 'p');
 	ExecutingProcess = scheduler();
+	/*if (!ExecutingProcess) {
+		printf("\nNão existe mais processos para serem escalonados. Encerrando\n");
+		exit(1);
+	}*/
 	contextChange(ExecutingProcess);
 }
 
@@ -379,8 +419,9 @@ PCB* initiManager() { //Função que cria uma nova estrutura de dados que represen
 	ReadyProcessNormalPriority = (int*)malloc(sizeof(int) * sizeOfVetorReadyProcessNormalPriority);
 	ReadyProcessHighPriority = (int*)malloc(sizeof(int) * sizeOfVetorReadyProcessHighPriority);
 
-	tabelaPCB[indiceOfVetorTabelaPCB+1].ID = -1;
-	createNewProcess(&tabelaPCB[indiceOfVetorTabelaPCB+1], NORMAL_PRIORITY);
+	indiceOfVetorTabelaPCB++;
+	tabelaPCB[indiceOfVetorTabelaPCB].ID = -1;
+	createNewProcess(&tabelaPCB[indiceOfVetorTabelaPCB], NORMAL_PRIORITY);
 	contextChange(scheduler());
 	return tabelaPCB;
 }
@@ -412,6 +453,9 @@ int main() {
 				int indice = processBlokedRemoveQueUE(0, LOW_PRIORITY);
 				indiceVetorBlokedProcessLowPriority--;
 				processReadyQueUE(indice);
+			}
+			else {
+				printf("\nNão ha processos para desbloquear\n");
 			}
 		}
 		else if (command == 'P' || command == 'T') {
@@ -470,6 +514,7 @@ int main() {
 			}
 
 			write(pipefd[1], &indiceVetorReadyProcessNormalPriority, sizeof(int));
+			printf("ready: %d", indiceVetorReadyProcessNormalPriority);
 			if (indiceVetorReadyProcessNormalPriority >= 0) {
 				for (i = 0; i < indiceVetorReadyProcessNormalPriority; i++) {
 					sendForReporter(ReadyProcessNormalPriority[i], pipefd);

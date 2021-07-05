@@ -88,6 +88,7 @@ int main() {
     }
     while (command != 'T')
     {
+        SystemPause();
         ClearScreen();
         printf("\nDigite o comando desejado:");
         printf("\nQ: Para colocar fim em uma unidade de tempo."
@@ -96,10 +97,10 @@ int main() {
                "\nT: Imprimi o tempo de retorno médio e, em seguida, finaliza o simulador\n"
         );
         scanf("%c", &command);
-        if (!(command == 'Q' || command == 'U' || command == 'P' || command == 'T')) {
+        /*if (!(command == 'Q' || command == 'U' || command == 'P' || command == 'T')) {
             printf("\nComando não encontrado\n");
             SystemPause();
-        }
+        }*/
         command = (char)toupper(command);
         write(pipefd[1], &command, 1);
         setbuf(stdin, NULL);
