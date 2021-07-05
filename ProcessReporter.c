@@ -44,14 +44,14 @@ int main() {
 		   "****************************************************************\n"
 		   "Tempo Atual: %ld\n", tempo);
 	printRemindReporter();
-	int i;
-
-
+	int i;	
+	
+	
 	int totalElementosBlokedLowPriority;
 	read(STDIN_FILENO, &totalElementosBlokedLowPriority, sizeof(int));
 	printf("BLOQUEADOS:\n");
 	if (totalElementosBlokedLowPriority >= 0) {
-		for (i = 0; i < totalElementosBlokedLowPriority; i++) {
+		for (i = 0; i <= totalElementosBlokedLowPriority; i++) {
 			printRemindReporter();
 		}
 	}
@@ -59,7 +59,7 @@ int main() {
 	int totalElementosBlokedNormalPriority;
 	read(STDIN_FILENO, &totalElementosBlokedNormalPriority, sizeof(int));
 	if (totalElementosBlokedNormalPriority >= 0) {
-		for (i = 0; i < totalElementosBlokedNormalPriority; i++) {
+		for (i = 0; i <= totalElementosBlokedNormalPriority; i++) {
 			printRemindReporter();
 		}
 	}
@@ -67,7 +67,7 @@ int main() {
 	int totalElementosBlokedHighPriority;
 	read(STDIN_FILENO, &totalElementosBlokedHighPriority, sizeof(int));
 	if (totalElementosBlokedHighPriority >= 0) {
-		for (i = 0; i < totalElementosBlokedHighPriority; i++) {
+		for (i = 0; i <= totalElementosBlokedHighPriority; i++) {
 			printRemindReporter();
 		}
 	}
@@ -76,15 +76,18 @@ int main() {
 	read(STDIN_FILENO, &totalElementosReadyLowPriority, sizeof(int));
 	printf("PRONTOS:\n");
 	if (totalElementosReadyLowPriority >= 0) {
-		for (i = 0; i < totalElementosReadyLowPriority; i++) {
+		for (i = 0; i <= totalElementosReadyLowPriority; i++) {
 			printRemindReporter();
 		}
 	}
 
-	int totalElementosReadyNormalPriority;
-	read(STDIN_FILENO, &totalElementosReadyNormalPriority, sizeof(int));
+	int totalElementosReadyNormalPriority = 0;
+	//read(STDIN_FILENO, &totalElementosReadyNormalPriority, sizeof(int));
+	printf("Reporter elementos ready normal: %d", totalElementosReadyNormalPriority);
 	if (totalElementosReadyNormalPriority >= 0) {
-		for (i = 0; i < totalElementosReadyNormalPriority; i++) {
+		printf("Entrei no if");
+		for (i = 0; i <= totalElementosReadyNormalPriority; i++) {
+			printf("Executei o for");
 			printRemindReporter();
 		}
 	}
@@ -92,7 +95,7 @@ int main() {
 	int totalElementosReadyHighPriority;
 	read(STDIN_FILENO, &totalElementosReadyHighPriority, sizeof(int));
 	if (totalElementosReadyHighPriority >= 0) {
-		for (i = 0; i < totalElementosReadyHighPriority; i++) {
+		for (i = 0; i <= totalElementosReadyHighPriority; i++) {
 			printRemindReporter();
 		}
 	}

@@ -89,7 +89,7 @@ int main() {
     while (command != 'T')
     {
         SystemPause();
-        ClearScreen();
+        //ClearScreen();
         printf("\nDigite o comando desejado:");
         printf("\nQ: Para colocar fim em uma unidade de tempo."
                "\nU: Para desbloquear o primeiro processo da fila."
@@ -104,7 +104,7 @@ int main() {
         command = (char)toupper(command);
         write(pipefd[1], &command, 1);
         setbuf(stdin, NULL);
-        SystemPause();
+        //SystemPause();
     }
     return 0;
 }
