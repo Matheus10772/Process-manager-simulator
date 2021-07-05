@@ -503,84 +503,81 @@ int main() {
 			}
 
 			printf("****************************************************************\n");*/
-			//pipefd = criarpipe();
-			//childpid = criarFork();
-			//if (childpid == 0) {
-			//	close(pipefd[1]);
-			//	redirecionarEntrada(pipefd, STDIN_FILENO, 0);
-			//	execlp("./processReporter", "./processReporter", NULL);
-			//}
-			//close(pipefd[0]);
+			pipefd = criarpipe();
+			childpid = criarFork();
+			if (childpid == 0) {
+				close(pipefd[1]);
+				redirecionarEntrada(pipefd, STDIN_FILENO, 0);
+				execlp("./processReporter", "./processReporter", NULL);
+			}
+			close(pipefd[0]);
 
-			//write(pipefd[1], &tempo, sizeof(unsigned long int));
-			///*Para o processo em execução*/
-			//write(pipefd[1], &tabelaPCB[ExecutingProcess].ID, sizeof(int));
-			//write(pipefd[1], &tabelaPCB[ExecutingProcess].parentID, sizeof(int));
-			//write(pipefd[1], &tabelaPCB[ExecutingProcess].ProgramCounter, sizeof(int));
-			//write(pipefd[1], &tabelaPCB[ExecutingProcess].startTime, sizeof(unsigned long int));
-			//unsigned long int tempoDeCPU = tabelaPCB[ExecutingProcess].totalElapsedTime + _CPU.currentTime;
-			//write(pipefd[1], &tempoDeCPU, sizeof(unsigned long int));
-			//write(pipefd[1], &tabelaPCB[ExecutingProcess].priority, sizeof(short int));
-			//write(pipefd[1], &tabelaPCB[ExecutingProcess].status, sizeof(short int));
-			//write(pipefd[1], &(tabelaPCB[ExecutingProcess]._ProcessoSimulado->VariavelManipulada), sizeof(int));
-			////***************************************************************************************************
+			write(pipefd[1], &tempo, sizeof(unsigned long int));
+			/*Para o processo em execução*/
+			write(pipefd[1], &tabelaPCB[ExecutingProcess].ID, sizeof(int));
+			write(pipefd[1], &tabelaPCB[ExecutingProcess].parentID, sizeof(int));
+			write(pipefd[1], &tabelaPCB[ExecutingProcess].ProgramCounter, sizeof(int));
+			write(pipefd[1], &tabelaPCB[ExecutingProcess].startTime, sizeof(unsigned long int));
+			unsigned long int tempoDeCPU = tabelaPCB[ExecutingProcess].totalElapsedTime + _CPU.currentTime;
+			write(pipefd[1], &tempoDeCPU, sizeof(unsigned long int));
+			write(pipefd[1], &tabelaPCB[ExecutingProcess].priority, sizeof(short int));
+			write(pipefd[1], &tabelaPCB[ExecutingProcess].status, sizeof(short int));
+			write(pipefd[1], &(tabelaPCB[ExecutingProcess]._ProcessoSimulado->VariavelManipulada), sizeof(int));
+			//***************************************************************************************************
 
-			///*Para os processos bloqueados*/
-			//int i;
-			//write(pipefd[1], &indiceVetorBlokedProcessLowPriority, sizeof(int));
-			//if (indiceVetorBlokedProcessLowPriority >= 0) {
-			//	for (i = 0; i <= indiceVetorBlokedProcessLowPriority; i++) {
-			//		sendForReporter(BlokedProcessLowPriority[i], pipefd);
-			//	}
-			//}
+			/*Para os processos bloqueados*/
+			int i;
+			write(pipefd[1], &indiceVetorBlokedProcessLowPriority, sizeof(int));
+			if (indiceVetorBlokedProcessLowPriority >= 0) {
+				for (i = 0; i <= indiceVetorBlokedProcessLowPriority; i++) {
+					sendForReporter(BlokedProcessLowPriority[i], pipefd);
+				}
+			}
 
-			//write(pipefd[1], &indiceVetorBlokedProcessNormalPriority, sizeof(int));
-			//if (indiceVetorBlokedProcessNormalPriority >= 0) {
-			//	for (i = 0; i <= indiceVetorBlokedProcessNormalPriority; i++) {
-			//		sendForReporter(BlokedProcessNormalPriority[i], pipefd);
-			//	}
-			//}
+			write(pipefd[1], &indiceVetorBlokedProcessNormalPriority, sizeof(int));
+			if (indiceVetorBlokedProcessNormalPriority >= 0) {
+				for (i = 0; i <= indiceVetorBlokedProcessNormalPriority; i++) {
+					sendForReporter(BlokedProcessNormalPriority[i], pipefd);
+				}
+			}
 
-			//write(pipefd[1], &indiceVetorBlokedProcessHighPriority, sizeof(int));
-			//if (indiceVetorBlokedProcessHighPriority >= 0) {
-			//	for (i = 0; i <= indiceVetorBlokedProcessHighPriority; i++) {
-			//		sendForReporter(BlokedProcessHighPriority[i], pipefd);
-			//	}
-			//}
-			////****************************************************************************************************
-
-			///*Para os processos prontos*/
-			//write(pipefd[1], &indiceVetorReadyProcessLowPriority, sizeof(int));
-			//if (indiceVetorReadyProcessLowPriority >= 0) {
-			//	for (i = 0; i <= indiceVetorReadyProcessLowPriority; i++) {
-			//		sendForReporter(ReadyProcessLowPriority[i], pipefd);
-			//	}
-			//}
-
-			//write(pipefd[1], &indiceVetorReadyProcessNormalPriority, sizeof(int));
-			//printf("ready: %d", indiceVetorReadyProcessNormalPriority);
-			//printf("ID para executar: %d", tabelaPCB[ReadyProcessNormalPriority[0]].ID);
-			//if (indiceVetorReadyProcessNormalPriority >= 0) {
-			//	for (i = 0; i <= indiceVetorReadyProcessNormalPriority; i++) {
-			//		sendForReporter(ReadyProcessNormalPriority[i], pipefd);
-			//	}
-			//}
-
-			//write(pipefd[1], &indiceVetorReadyProcessHighPriority, sizeof(int));
-			//if (indiceVetorReadyProcessHighPriority >= 0) {
-			//	for (i = 0; i <= indiceVetorReadyProcessHighPriority; i++) {
-			//		sendForReporter(ReadyProcessHighPriority[i], pipefd);
-			//	}
-			//}
+			write(pipefd[1], &indiceVetorBlokedProcessHighPriority, sizeof(int));
+			if (indiceVetorBlokedProcessHighPriority >= 0) {
+				for (i = 0; i <= indiceVetorBlokedProcessHighPriority; i++) {
+					sendForReporter(BlokedProcessHighPriority[i], pipefd);
+				}
+			}
 			//****************************************************************************************************
 
-			//close(pipefd[1]);
+			/*Para os processos prontos*/
+			write(pipefd[1], &indiceVetorReadyProcessLowPriority, sizeof(int));
+			if (indiceVetorReadyProcessLowPriority >= 0) {
+				for (i = 0; i <= indiceVetorReadyProcessLowPriority; i++) {
+					sendForReporter(ReadyProcessLowPriority[i], pipefd);
+				}
+			}
+
+			write(pipefd[1], &indiceVetorReadyProcessNormalPriority, sizeof(int));
+			printf("ready: %d", indiceVetorReadyProcessNormalPriority);
+			printf("ID para executar: %d", tabelaPCB[ReadyProcessNormalPriority[0]].ID);
+			if (indiceVetorReadyProcessNormalPriority >= 0) {
+				for (i = 0; i <= indiceVetorReadyProcessNormalPriority; i++) {
+					sendForReporter(ReadyProcessNormalPriority[i], pipefd);
+				}
+			}
+
+			write(pipefd[1], &indiceVetorReadyProcessHighPriority, sizeof(int));
+			if (indiceVetorReadyProcessHighPriority >= 0) {
+				for (i = 0; i <= indiceVetorReadyProcessHighPriority; i++) {
+					sendForReporter(ReadyProcessHighPriority[i], pipefd);
+				}
+			}
+			//****************************************************************************************************
+
+			close(pipefd[1]);
 			if (command == 'T')
 				exit(0);
 		}
-		/*else {
-			printf("\nComando não encontrado\n");
-		}*/
 	}
 	return 0;
 }

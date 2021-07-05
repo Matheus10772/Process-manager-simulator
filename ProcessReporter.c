@@ -82,12 +82,9 @@ int main() {
 	}
 
 	int totalElementosReadyNormalPriority = 0;
-	//read(STDIN_FILENO, &totalElementosReadyNormalPriority, sizeof(int));
-	printf("Reporter elementos ready normal: %d", totalElementosReadyNormalPriority);
+	read(STDIN_FILENO, &totalElementosReadyNormalPriority, sizeof(int));
 	if (totalElementosReadyNormalPriority >= 0) {
-		printf("Entrei no if");
 		for (i = 0; i <= totalElementosReadyNormalPriority; i++) {
-			printf("Executei o for");
 			printRemindReporter();
 		}
 	}
