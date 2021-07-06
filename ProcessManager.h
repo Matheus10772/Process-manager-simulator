@@ -106,7 +106,7 @@ PCB* getLastElementOfPCBTable();//Retorna o último elemento do vetor de tabela 
 void createNewProcess(PCB* pcbCalled, int priority);//cria um novo processo e coloca o indice na lista de processos prontos
 int scheduler();//Retorna o indice de algum processo que deve ser escalado, ou seja, que entrará em execução
 void contextChange(int indice);//Muda qual processo ficará em execução na CPU
-char** splitString(char* string);//divide uma string em várias sub-strings mediante ao delimitador fornecido
+char** splitString(char string[]);//divide uma string em várias sub-strings mediante ao delimitador fornecido
 char** readFile(char arqName[]);//Lê um arquivo de instruções de um processo, mediante ao fornecimento do nome do arquivo
 void replaceProgramList(CPU* __CPU, char arqName[]);//Substituí a lista de instruções do processo atualmente em execução
 void updateValue(CPU* __CPU, int n);//Seta o valor da variavel para instrução do tipo S, atualizando o valor para N

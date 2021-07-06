@@ -137,6 +137,7 @@ int processReadyRemoveQueUE(int indice, int priority) {//Remove o indice do elem
 	}
 	else if (priority == NORMAL_PRIORITY) {
 		processo = ReadyProcessNormalPriority[indice];
+		printf("\nprocesso: %d\n", processo);
 		removeFromVector(ReadyProcessNormalPriority, &processo, indiceVetorReadyProcessNormalPriority, 'i');
 		indiceVetorReadyProcessNormalPriority--;
 		return processo;
@@ -203,7 +204,7 @@ void createNewProcess(PCB* pcbCalled, int priority) { //cria um novo processo e 
 	if (indiceOfVetorTabelaPCB >= 0) //Se passar nesse teste, significa que não é o primeiro elemento da tabela PCB
 	{
 		newProcess->VariavelManipulada = (pcbCalled->_ProcessoSimulado)->VariavelManipulada;
-		newProcess->programInstructionsList = pcbCalled->_ProcessoSimulado->programInstructionsList;
+		newProcess->programInstructionsList = pcbCalled->_ProcessoSimulado->programInstructionsList ;
 
 		LastElementOfPCBTable->parentID = pcbCalled->ID;
 		LastElementOfPCBTable->ProgramCounter = pcbCalled->ProgramCounter;
@@ -275,17 +276,23 @@ void contextChange(int indice) {//Muda qual processo ficará em execução na CPU
 	_CPU.VariavelManipulada = &(tabelaPCB[indice]._ProcessoSimulado->VariavelManipulada);
 }
 
-char** splitString(char* string) {//divide uma string em várias sub-strings mediante ao delimitador fornecido
-	int quantidade = 0;
-	int i = 0;
-	char** strings = NULL, * pch = strtok(string, " ");
-	while (pch != NULL) {
-		strings = realloc(strings, sizeof(char*) * (quantidade + 1));
-		strings[i] = malloc(strlen(pch) + 1); // + 1 para o terminador
-		strcpy(strings[i++], pch);
-		pch = strtok(NULL, " ");
+char** splitString(char string[]) {//divide uma string em várias sub-strings mediante ao delimitador fornecido
+	char** strings = (char**)malloc(sizeof(char) * 2);
+	char* buffer = (char*)malloc(sizeof(char) * 256);
+	int j = 0;
+	int k = 0;
+	for (int i = 0; i < strlen(string); i++) {
+		if (string[i] == ' ' || string[i] == '\n') {
+			strings[j] = buffer;
+			buffer = (char*)malloc(sizeof(char) * 256);
+			j++;
+			k = 0;
+		}
+		else {
+			buffer[k] = string[i];
+			k++;
+		}
 	}
-
 	return strings;
 }
 
@@ -299,10 +306,11 @@ char** readFile(char arqName[]) {//Lê um arquivo de instruções de um processo, m
 		printf("\nSucesso\n");
 	}
 	char** linhas = (char**)malloc(sizeof(char*) * 1024);
-	char linha[1024];
+	char linha[256];
 	unsigned int indice = 0;
 	while (!feof(arq))
 	{
+		int j = 0;
 		fgets(linha, sizeof(linha), arq);
 		linhas[indice] = strdup(linha);
 		indice++;
@@ -315,7 +323,7 @@ char** readFile(char arqName[]) {//Lê um arquivo de instruções de um processo, m
 void replaceProgramList(CPU* __CPU, char arqName[]) {//Substituí a lista de instruções do processo atualmente em execução
 	char* arqNameCopia = (char*)malloc(sizeof(char) * (strlen(arqName)));
 	int j = 0;
-	for (int i = 0; i < strlen(arqName) - 2; i++) {
+	for (int i = 0; i < strlen(arqName); i++) {
 		if (arqName[i] != ' ') {
 			arqNameCopia[j] = arqName[i];
 			j++;
@@ -346,31 +354,37 @@ void execInstruction(CPU* __CPU) {//Executa a função correspondente da Lista de 
 	char** executar = splitString(__CPU->programInstructionsList[__CPU->ProgramCounter]);
 	__CPU->ProgramCounter++;
 	executar[0][0] = (char)toupper(executar[0][0]);
-	printf("\nExecutando instrução: %c\n", executar[0][0]);
+	printf("\nExecutando instrução:%c\n", executar[0][0]);
 	if (executar[0][0] == 'S') {
-		if(executar[1])
+		if(atoi(executar[1]))
 			updateValue(__CPU, atoi(executar[1]));
 	}
 	else if (executar[0][0] == 'A') {
-		if(executar[1])
+		if(atoi(executar[1]))
 			sumValue(__CPU, atoi(executar[1]));
 	}
 	else if (executar[0][0] == 'D') {
-		if(executar[1])
+		if(atoi(executar[1]))
 			subtractValue(__CPU, atoi(executar[1]));
 	}
 	else if (executar[0][0] == 'B') {
+		printf("\nBloqueando processo e escalonando outro\n");
 		blockExecutingProcess(__CPU, ExecutingProcess);
 	}
 	else if (executar[0][0] == 'E') {
+		printf("\nEncerrando processo e escalonando outro\n");
 		finishExecutingProcess(ExecutingProcess);
 	}
 	else if (executar[0][0] == 'F') {
+		printf("\nCriando novo processo\n");
+		tabelaPCB[ExecutingProcess].ProgramCounter = _CPU.ProgramCounter;
 		createNewProcess(&(tabelaPCB[ExecutingProcess]), NORMAL_PRIORITY);
 	}
 	else if (executar[0][0] == 'R') {
-		if (executar[1])
+		if (executar[1]) {
+			printf("\nTrocando arquivo de instruções do processo atual\n");
 			replaceProgramList(__CPU, executar[1]);
+		}
 	}
 }
 
@@ -387,6 +401,7 @@ void blockExecutingProcess(CPU* __CPU, int indice) { //Bloqueia o processo atual
 	tabelaPCB[indice].ProgramCounter = __CPU->ProgramCounter;
 	tabelaPCB[indice].totalElapsedTime += __CPU->currentTime;
 	tabelaPCB[indice].status = BLOKED_STATUS;
+	tabelaPCB[indice]._ProcessoSimulado->programInstructionsList = __CPU->programInstructionsList;
 	ExecutingProcess = scheduler();
 	contextChange(ExecutingProcess);
 }
